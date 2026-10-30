@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Banana Quest Enterprise - Distributed Educational Gaming System</title>
+  <meta name="description" content="CIS046-3 Software For Enterprise - Banana API Game exploring Version Control, Event-Driven Programming, Interoperability, and Virtual Identity.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <!-- Background ambient glow -->
+  <div class="ambient-glow glow-top-left"></div>
+  <div class="ambient-glow glow-bottom-right"></div>
+
+  <!-- Header & Navigation -->
+  <header class="app-header">
+    <div class="header-branding">
+      <div class="logo-icon">🍌</div>
+      <div class="brand-text">
+        <h1 class="logo-title">BANANA QUEST</h1>
+        <span class="subtitle">ENTERPRISE DISTRIBUTED EDITION • CIS046-3</span>
+      </div>
+    </div>
+
+    <!-- Diagnostic & Identity Bar -->
+    <div class="header-controls">
+      <!-- Network Interoperability Status Pill -->
+      <div class="status-pill online" id="network-status-pill" title="Banana API Gateway Connectivity">
+        ONLINE
+      </div>
+
+      <!-- Telemetry Toggle Buttons -->
+      <button class="tool-btn" id="btn-toggle-api-inspector" title="View Banana API Interoperability Telemetry">
+        <span class="icon">🌐</span> API Interop
+      </button>
+
+      <button class="tool-btn" id="btn-toggle-events" title="View Live Event-Driven Bus Telemetry">
+        <span class="icon">⚡</span> Event Stream
+      </button>
+
+      <!-- Audio Toggle -->
+      <button class="tool-btn" id="btn-mute-toggle" title="Toggle Web Audio Sound">
+        🔊 Sound
+      </button>
+
+      <!-- Virtual Identity Profile / Auth Action -->
+      <div class="user-profile-widget" id="user-profile-widget">
+        <div class="user-badge" id="user-badge"></div>
+        <span class="user-name" id="user-name-display">Guest Player</span>
+        <button class="btn-auth" id="btn-login-open">Sign In</button>
+        <button class="btn-auth btn-logout hidden" id="btn-logout">Sign Out</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Game & Dashboard Layout -->
+  <main class="app-main-container">
+    
+    <!-- Left Column: Live Arena -->
+    <section class="game-arena-card">
+      <div class="arena-header">
+        <div class="stat-pill">
+          <span class="label">SCORE</span>
+          <span class="val" id="score-value">0</span>
+        </div>
+
+        <div class="stat-pill" id="streak-container">
+          <span class="label">STREAK</span>
+          <span class="val highlight" id="streak-value">0x</span>
+        </div>
+
+        <div class="stat-pill timer-pill">
+          <span class="label">TIME LEFT</span>
+          <span class="val" id="timer-value">45s</span>
+        </div>
+      </div>
+
+      <!-- Linear Timer Bar -->
+      <div class="timer-bar-track">
+        <div class="timer-bar-fill" id="timer-bar-fill"></div>
+      </div>
+
+      <!-- Puzzle Presentation Stage -->
+      <div class="puzzle-stage">
+        <!-- Live Interop Badges -->
+        <div class="interop-stage-tags">
+          <span class="interop-tag" id="api-source-badge">MARC CONRAD API</span>
+          <span class="interop-tag latency" id="api-latency-badge">--ms</span>
+        </div>
+
+        <!-- Puzzle Visual Canvas -->
+        <div class="puzzle-image-wrapper">
+          <img id="puzzle-image" src="" alt="Banana Puzzle from REST API" class="puzzle-img">
+          
+          <div class="puzzle-loader hidden" id="puzzle-loader">
+            <div class="spinner"></div>
+            <span>Fetching Puzzle from Banana API...</span>
+          </div>
+
+          <!-- Answer Feedback Splash -->
+          <div class="feedback-overlay" id="feedback-overlay">
+            <span class="feedback-text" id="feedback-text"></span>
+          </div>
+        </div>
+
+        <!-- Start Overlay -->
+        <div class="start-overlay" id="game-start-overlay">
+          <div class="start-card">
+            <h2>Ready for the Banana Challenge?</h2>
+            <p>Solve each math equation to find the missing banana value (0–9). High speed and consecutive correct answers unlock combo multiplier bonuses!</p>
+            <div class="instruction-keys">
+              <span>⌨️ Use keyboard numbers <strong>0–9</strong> or on-screen keypad</span>
+            </div>
+            <button class="btn-primary" id="btn-start-game">START GAME</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Interactive Input Keypad (0-9 + Clear) -->
+      <div class="keypad-panel">
+        <div class="keypad-grid">
+          <button class="keypad-btn" data-val="1">1</button>
+          <button class="keypad-btn" data-val="2">2</button>
+          <button class="keypad-btn" data-val="3">3</button>
+          <button class="keypad-btn" data-val="4">4</button>
+          <button class="keypad-btn" data-val="5">5</button>
+          <button class="keypad-btn" data-val="6">6</button>
+          <button class="keypad-btn" data-val="7">7</button>
+          <button class="keypad-btn" data-val="8">8</button>
+          <button class="keypad-btn" data-val="9">9</button>
+          <button class="keypad-btn btn-clear" data-val="clear">CLEAR</button>
+          <button class="keypad-btn" data-val="0">0</button>
+          <button class="keypad-btn btn-restart" id="btn-restart-game">RESTART</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Right Column: Enterprise Leaderboard & Four Themes Overview -->
+    <aside class="sidebar-column">
+      <!-- Global Leaderboard -->
+      <div class="dashboard-card leaderboard-card">
+        <div class="card-header">
+          <h3>🏆 Global Enterprise Leaderboard</h3>
+          <button class="icon-btn" id="btn-refresh-leaderboard" title="Refresh Leaderboard">🔄</button>
+        </div>
+        <div class="table-responsive">
+          <table class="leaderboard-table">
+            <thead>
+              <tr>
+                <th>Rank</th>
+                <th>Player (Virtual ID)</th>
+                <th>Score</th>
+                <th>Solved</th>
+                <th>Streak</th>
+              </tr>
+            </thead>
+            <tbody id="leaderboard-body">
+              <tr><td colspan="5" style="text-align:center; padding: 20px;">Loading ranks...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Architectural Themes Reference Card -->
+      <div class="dashboard-card themes-card">
+        <div class="card-header">
+          <h3>📐 Core CS Themes Implemented</h3>
+        </div>
+        <div class="theme-items-grid">
+          <div class="theme-item">
+            <div class="theme-icon">🌿</div>
+            <div>
+              <strong>1. Version Control</strong>
+              <p>Git Flow branching, atomic commits, and semantic tagging (<code>v0.1.0-alpha</code>, <code>v1.0.0</code>).</p>
+            </div>
+          </div>
+          <div class="theme-item">
+            <div class="theme-icon">⚡</div>
+            <div>
+              <strong>2. Event-Driven Programming</strong>
+              <p>Decoupled Pub/Sub EventBus, custom lifecycle events, and Web Audio synthesis.</p>
+            </div>
+          </div>
+          <div class="theme-item">
+            <div class="theme-icon">🌐</div>
+            <div>
+              <strong>3. Interoperability</strong>
+              <p>RESTful HTTP/JSON integration with Marc Conrad's API, server gateway, and resilience fallback.</p>
+            </div>
+          </div>
+          <div class="theme-item">
+            <div class="theme-icon">🔒</div>
+            <div>
+              <strong>4. Virtual Identity</strong>
+              <p>Bcrypt salted password hashing, HTTP-only signed session cookies, and user audit trails.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+  </main>
+
+  <!-- Slide-out Drawer: Event-Driven Stream Inspector -->
+  <div class="telemetry-drawer" id="event-inspector-drawer">
+    <div class="drawer-header">
+      <div class="drawer-title">
+        <span>⚡ Live Event-Driven Pub/Sub Stream</span>
+      </div>
+      <div class="drawer-actions">
+        <button class="btn-sm" id="btn-clear-events">Clear</button>
+        <button class="btn-close" onclick="document.getElementById('event-inspector-drawer').classList.remove('open')">✕</button>
+      </div>
+    </div>
+    <div class="drawer-info">
+      Visual proof of decoupled event publication & subscription between engine and UI.
+    </div>
+    <div class="event-log-container" id="event-log-container">
+      <!-- Populated dynamically via uiController.js -->
+    </div>
+  </div>
+
+  <!-- Slide-out Drawer: API Interoperability Inspector -->
+  <div class="telemetry-drawer" id="api-inspector-drawer">
+    <div class="drawer-header">
+      <div class="drawer-title">
+        <span>🌐 Banana API Interoperability Gateway</span>
+      </div>
+      <div class="drawer-actions">
+        <button class="btn-sm" id="btn-refresh-api-status">Refresh</button>
+        <button class="btn-close" onclick="document.getElementById('api-inspector-drawer').classList.remove('open')">✕</button>
+      </div>
+    </div>
+    <div class="drawer-info">
+      Direct inspection of REST/JSON communication with Marc Conrad's Banana API and resilience telemetry.
+    </div>
+    <div class="api-report-container" id="api-report-container">
+      <!-- Populated dynamically via uiController.js -->
+    </div>
+  </div>
+
+  <!-- Virtual Identity Authentication Modal -->
+  <div class="modal-backdrop hidden" id="auth-modal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-tabs">
+          <button class="modal-tab active" id="tab-login">Sign In</button>
+          <button class="modal-tab" id="tab-register">Register Identity</button>
+        </div>
+        <button class="btn-close" id="auth-modal-close">✕</button>
+      </div>
+
+      <!-- Login Form -->
+      <form id="form-login" class="auth-form">
+        <div class="form-group">
+          <label for="login-username">Username</label>
+          <input type="text" id="login-username" required placeholder="Enter username" autocomplete="username">
+        </div>
+        <div class="form-group">
+          <label for="login-password">Password</label>
+          <input type="password" id="login-password" required placeholder="Enter password" autocomplete="current-password">
+        </div>
+        <button type="submit" class="btn-primary full-width">ESTABLISH IDENTITY</button>
+      </form>
+
+      <!-- Register Form -->
+      <form id="form-register" class="auth-form hidden">
+        <div class="form-group">
+          <label for="reg-username">Username (3-20 chars)</label>
+          <input type="text" id="reg-username" required placeholder="Choose unique username" autocomplete="username">
+        </div>
+        <div class="form-group">
+          <label for="reg-displayname">Display Name / Gamertag</label>
+          <input type="text" id="reg-displayname" placeholder="E.g. Banana Champion">
+        </div>
+        <div class="form-group">
+          <label for="reg-password">Password (min 6 chars)</label>
+          <input type="password" id="reg-password" required placeholder="Create secure password" autocomplete="new-password">
+        </div>
+        <button type="submit" class="btn-primary full-width">CREATE VIRTUAL IDENTITY</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Game Over Summary Modal -->
+  <div class="modal-backdrop hidden" id="game-over-modal">
+    <div class="modal-card game-over-card">
+      <div class="game-over-banner">🎮 ROUND FINISHED!</div>
+      
+      <div class="recap-grid">
+        <div class="recap-item">
+          <span class="recap-label">FINAL SCORE</span>
+          <span class="recap-val highlight" id="final-score">0</span>
+        </div>
+        <div class="recap-item">
+          <span class="recap-label">SOLVED</span>
+          <span class="recap-val" id="final-solved">0</span>
+        </div>
+        <div class="recap-item">
+          <span class="recap-label">ACCURACY</span>
+          <span class="recap-val" id="final-accuracy">0%</span>
+        </div>
+        <div class="recap-item">
+          <span class="recap-label">MAX STREAK</span>
+          <span class="recap-val" id="final-streak">0x</span>
+        </div>
+      </div>
+
+      <div class="modal-footer-action">
+        <button class="btn-primary" id="btn-play-again">PLAY AGAIN</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Floating Toast Notifications -->
+  <div class="toast-container" id="toast-container"></div>
+
+  <!-- Scripts in Modular Order -->
+  <script src="js/eventBus.js"></script>
+  <script src="js/soundManager.js"></script>
+  <script src="js/apiClient.js"></script>
+  <script src="js/authManager.js"></script>
+  <script src="js/gameEngine.js"></script>
+  <script src="js/uiController.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
